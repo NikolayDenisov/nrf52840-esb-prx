@@ -25,13 +25,13 @@ nrf_esb_payload_t rx_payload;
 void nrf_esb_event_handler(nrf_esb_evt_t const *p_event) {
   switch (p_event->evt_id) {
   case NRF_ESB_EVENT_TX_SUCCESS:
-    NRF_LOG_DEBUG("TX SUCCESS EVENT");
+    NRF_LOG_INFO("TX SUCCESS EVENT");
     break;
   case NRF_ESB_EVENT_TX_FAILED:
-    NRF_LOG_DEBUG("TX FAILED EVENT");
+    NRF_LOG_INFO("TX FAILED EVENT");
     break;
   case NRF_ESB_EVENT_RX_RECEIVED:
-    NRF_LOG_DEBUG("RX RECEIVED EVENT");
+    NRF_LOG_INFO("RX RECEIVED EVENT");
     if (nrf_esb_read_rx_payload(&rx_payload) == NRF_SUCCESS) {
       // Set LEDs identical to the ones on the PTX.
       nrf_gpio_pin_write(
@@ -41,7 +41,7 @@ void nrf_esb_event_handler(nrf_esb_evt_t const *p_event) {
       nrf_gpio_pin_write(
           LED_3, !(rx_payload.data[1] % 8 > 2 && rx_payload.data[1] % 8 <= 6));
 
-      NRF_LOG_DEBUG("Receiving packet: %02x", rx_payload.data[1]);
+      NRF_LOG_INFO("Receiving packet: %02x", rx_payload.data[1]);
     }
     break;
   }
@@ -100,12 +100,13 @@ int main(void) {
   err_code = esb_init();
   APP_ERROR_CHECK(err_code);
 
-  NRF_LOG_DEBUG("Enhanced ShockBurst Receiver Example started.");
+  NRF_LOG_INFO("Enhanced ShockBurst Receiver Example started.");
 
   err_code = nrf_esb_start_rx();
   APP_ERROR_CHECK(err_code);
 
   while (true) {
+    NRF_LOG_FLUSH();
     if (NRF_LOG_PROCESS() == false) {
       __WFE();
     }
