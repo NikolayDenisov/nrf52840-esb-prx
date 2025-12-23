@@ -12,11 +12,11 @@
 nrf52840-esb-prx
 ├── armgcc
 │   ├── esb_prx_gcc_nrf52.ld     # Linker script
-│   └── Makefile                # Сборка и прошивка
+│   └── Makefile                 # Сборка и прошивка
 ├── config
-│   ├── custom_board.h          # Описание платы (SuperMini)
+│   ├── custom_board.h           # Описание платы (SuperMini)
 │   ├── nrf52840_mdk.h
-│   └── sdk_config.h            # Конфигурация SDK
+│   └── sdk_config.h             # Конфигурация SDK
 ├── hex                          # Результат сборки (.hex)
 └── main.c                       # Пример ESB PRX
 ```
