@@ -2,8 +2,9 @@ PROJECT_NAME     := esb_prx_pca10056
 TARGETS          := nrf52840_xxaa
 OUTPUT_DIRECTORY := _build
 
-SDK_ROOT := ../../../../../..
-PROJ_DIR := ../../..
+SDK_ROOT := /Users/nick/projects/iot/nRF5_SDK_17.1.0_ddde560/
+PROJ_DIR := ..
+MDK_ROOT := /Users/nick/projects/iot/nrf52840-mdk
 
 $(OUTPUT_DIRECTORY)/nrf52840_xxaa.out: \
   LINKER_SCRIPT  := esb_prx_gcc_nrf52.ld
@@ -50,6 +51,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/libraries/strerror \
   $(SDK_ROOT)/components/toolchain/cmsis/include \
   $(SDK_ROOT)/components/libraries/util \
+  $(MDK_ROOT)/config \
   ../config \
   $(SDK_ROOT)/components/libraries/balloc \
   $(SDK_ROOT)/components/libraries/ringbuf \
@@ -81,7 +83,8 @@ OPT = -O3 -g3
 
 # C flags common to all targets
 CFLAGS += $(OPT)
-CFLAGS += -DBOARD_PCA10056
+CFLAGS += -DBOARD_CUSTOM
+CFLAGS += -DNRF52840_MDK
 CFLAGS += -DBSP_DEFINES_ONLY
 CFLAGS += -DCONFIG_GPIO_AS_PINRESET
 CFLAGS += -DESB_PRESENT
@@ -102,8 +105,9 @@ ASMFLAGS += -g3
 ASMFLAGS += -mcpu=cortex-m4
 ASMFLAGS += -mthumb -mabi=aapcs
 ASMFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16
-ASMFLAGS += -DBOARD_PCA10056
-ASMFLAGS += -DBSP_DEFINES_ONLY
+ASMFLAGS += -DBOARD_CUSTOM
+ASMFLAGS += -DNRF52840_MDK
+ASMFLAGS += -DBSP_UART_SUPPORT
 ASMFLAGS += -DCONFIG_GPIO_AS_PINRESET
 ASMFLAGS += -DESB_PRESENT
 ASMFLAGS += -DFLOAT_ABI_HARD
@@ -153,11 +157,10 @@ $(foreach target, $(TARGETS), $(call define_target, $(target)))
 # Flash the program
 flash: default
 	@echo Flashing: $(OUTPUT_DIRECTORY)/nrf52840_xxaa.hex
-	nrfjprog -f nrf52 --program $(OUTPUT_DIRECTORY)/nrf52840_xxaa.hex --sectorerase
-	nrfjprog -f nrf52 --reset
-
+	pyocd flash -t nrf52840 $(OUTPUT_DIRECTORY)/nrf52840_xxaa.hex
+# Erase chip
 erase:
-	nrfjprog -f nrf52 --eraseall
+	pyocd erase -t nrf52840 --chip
 
 SDK_CONFIG_FILE := ../config/sdk_config.h
 CMSIS_CONFIG_TOOL := $(SDK_ROOT)/external_tools/cmsisconfig/CMSIS_Configuration_Wizard.jar
