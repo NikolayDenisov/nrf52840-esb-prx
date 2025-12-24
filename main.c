@@ -14,13 +14,42 @@
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 
-uint8_t led_nr;
+#define LED_R 22
+#define LED_G 23
+#define LED_B 24
+
+typedef enum {
+  RGB_OFF,
+  RGB_RED,
+  RGB_GREEN,
+  RGB_BLUE,
+} rgb_color_t;
+
+void rgb_set(rgb_color_t color) {
+  // active-low
+  nrf_gpio_pin_write(LED_R, 1);
+  nrf_gpio_pin_write(LED_G, 1);
+  nrf_gpio_pin_write(LED_B, 1);
+
+  switch (color) {
+  case RGB_RED:
+    nrf_gpio_pin_write(LED_R, 0);
+    break;
+
+  case RGB_GREEN:
+    nrf_gpio_pin_write(LED_G, 0);
+    break;
+
+  case RGB_BLUE:
+    nrf_gpio_pin_write(LED_B, 0);
+    break;
+
+  default:
+    break;
+  }
+}
 
 nrf_esb_payload_t rx_payload;
-
-/*lint -save -esym(40, BUTTON_1) -esym(40, BUTTON_2) -esym(40, BUTTON_3)
- * -esym(40, BUTTON_4) -esym(40, LED_1) -esym(40, LED_2) -esym(40, LED_3)
- * -esym(40, LED_4) */
 
 void nrf_esb_event_handler(nrf_esb_evt_t const *p_event) {
   switch (p_event->evt_id) {
@@ -32,14 +61,10 @@ void nrf_esb_event_handler(nrf_esb_evt_t const *p_event) {
     break;
   case NRF_ESB_EVENT_RX_RECEIVED:
     NRF_LOG_INFO("RX RECEIVED EVENT");
+
     if (nrf_esb_read_rx_payload(&rx_payload) == NRF_SUCCESS) {
-      // Set LEDs identical to the ones on the PTX.
-      nrf_gpio_pin_write(
-          LED_1, !(rx_payload.data[1] % 8 > 0 && rx_payload.data[1] % 8 <= 4));
-      nrf_gpio_pin_write(
-          LED_2, !(rx_payload.data[1] % 8 > 1 && rx_payload.data[1] % 8 <= 5));
-      nrf_gpio_pin_write(
-          LED_3, !(rx_payload.data[1] % 8 > 2 && rx_payload.data[1] % 8 <= 6));
+
+      rgb_set(rx_payload.data[1] % 4);
 
       NRF_LOG_INFO("Receiving packet: %02x", rx_payload.data[1]);
     }
